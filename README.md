@@ -178,6 +178,41 @@ python src/building_codes_server/server.py
 python src/material_specs_server/server.py
 ```
 
+## Web Testing Interface
+
+For testing on Linux or without Claude Desktop, use the web interface:
+
+### Prerequisites
+```bash
+# Install Flask
+pip install flask
+
+# Set your Anthropic API key
+export ANTHROPIC_API_KEY='your-key-here'
+```
+
+### Run the Web Interface
+```bash
+python test_web_interface.py
+```
+
+Then open your browser to: http://localhost:5000
+
+### Features
+- Interactive chat with Claude + MCP tools
+- Real-time building code lookups
+- Material search and pricing
+- Project calculators
+- Complete conversation history
+- Example queries to get started
+
+### Example Queries
+Try these in the web interface:
+- "What are the outlet spacing requirements for a kitchen?"
+- "Search for 12 gauge wire and show me prices"
+- "Calculate how much wire I need for a 40-foot circuit"
+- "I'm installing a dishwasher 30 feet from the panel. What do I need?"
+
 ## Roadmap
 
 - [ ] Vector search integration (Pinecone/pgvector)
