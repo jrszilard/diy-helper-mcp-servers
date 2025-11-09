@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DIY Helper - MCP Test Interface</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f5f5f5;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .header {
+            background: #2563eb;
+            color: white;
+            padding: 1rem 2rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .header h1 {
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+        
+        .header p {
+            font-size: 0.875rem;
+            opacity: 0.9;
+            margin-top: 0.25rem;
+        }
+        
+        .chat-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            max-width: 1200px;
+            width: 100%;
+            margin: 0 auto;
+            background: white;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+        }
+        
+        .messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+        
+        .message {
+            display: flex;
+            gap: 1rem;
+            max-width: 80%;
+        }
+        
+        .message.user {
+            align-self: flex-end;
+            flex-direction: row-reverse;
+        }
+        
+        .message.assistant {
+            align-self: flex-start;
+        }
+        
+        .message-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            flex-shrink: 0;
+        }
+        
+        .message.user .message-avatar {
+            background: #2563eb;
+            color: white;
+        }
+        
+        .message.assistant .message-avatar {
+            background: #10b981;
+            color: white;
+        }
+        
+        .message-content {
+            background: #f3f4f6;
+            padding: 1rem;
+            border-radius: 1rem;
+            line-height: 1.6;
+        }
+        
+        .message.user .message-content {
+            background: #2563eb;
+            color: white;
+        }
+        
+        .message.assistant .message-content {
+            background: #f3f4f6;
+            color: #1f2937;
+        }
+        
+        .input-area {
+            border-top: 1px solid #e5e7eb;
+            padding: 1.5rem 2rem;
+            background: white;
+        }
+        
+        .input-form {
+            display: flex;
+            gap: 1rem;
+        }
+        
+        .input-field {
+            flex: 1;
+            padding: 0.75rem 1rem;
+            border: 2px solid #e5e7eb;
+            border-radius: 0.5rem;
+            font-size: 1rem;
+            font-family: inherit;
+        }
+        
+        .input-field:focus {
+            outline: none;
+            border-color: #2563eb;
+        }
+        
+        .send-button {
+            padding: 0.75rem 2rem;
+            background: #2563eb;
+            color: white;
+            border: none;
+            border-radius: 0.5rem;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        
+        .send-button:hover {
+            background: #1d4ed8;
+        }
+        
+        .send-button:disabled {
+            background: #9ca3af;
+            cursor: not-allowed;
+        }
+        
+        .loading {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+            color: #6b7280;
+            padding: 1rem;
+        }
+        
+        .loading-dots {
+            display: flex;
+            gap: 0.25rem;
+        }
+        
+        .loading-dot {
+            width: 8px;
+            height: 8px;
+            background: #6b7280;
+            border-radius: 50%;
+            animation: bounce 1.4s infinite ease-in-out;
+        }
+        
+        .loading-dot:nth-child(1) {
+            animation-delay: -0.32s;
+        }
+        
+        .loading-dot:nth-child(2) {
+            animation-delay: -0.16s;
+        }
+        
+        @keyframes bounce {
+            0%, 80%, 100% {
+                transform: scale(0);
+            }
+            40% {
+                transform: scale(1);
+            }
+        }
+        
+        .examples {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+        
+        .example-chip {
+            padding: 0.5rem 1rem;
+            background: #eff6ff;
+            color: #2563eb;
+            border: 1px solid #2563eb;
+            border-radius: 1rem;
+            font-size: 0.875rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .example-chip:hover {
+            background: #2563eb;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🛠️ DIY Helper MCP Test Interface</h1>
+        <p>Testing Building Codes + Material Specs MCP Servers with Claude</p>
+    </div>
+    
+    <div class="chat-container">
+        <div class="messages" id="messages">
+            <div class="message assistant">
+                <div class="message-avatar">🤖</div>
+                <div class="message-content">
+                    <p><strong>Welcome to DIY Helper!</strong></p>
+                    <p style="margin-top: 0.5rem;">I'm Claude with access to building codes and material specs. I can help you with:</p>
+                    <ul style="margin-top: 0.5rem; margin-left: 1.5rem;">
+                        <li>Building code requirements (NEC, IRC, IPC)</li>
+                        <li>Material recommendations and pricing</li>
+                        <li>Project calculations (wire, outlets, tile, etc.)</li>
+                        <li>Shopping lists for DIY projects</li>
+                    </ul>
+                    <p style="margin-top: 0.5rem;">Try one of the examples below or ask me anything!</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="input-area">
+            <div class="examples">
+                <button class="example-chip" onclick="sendExample('What are the outlet spacing requirements for a kitchen?')">
+                    Kitchen Outlet Requirements
+                </button>
+                <button class="example-chip" onclick="sendExample('I need to buy 12 gauge wire. What are my options and prices?')">
+                    Find Wire Products
+                </button>
+                <button class="example-chip" onclick="sendExample('How much wire do I need for a 40-foot circuit run?')">
+                    Calculate Wire Needed
+                </button>
+                <button class="example-chip" onclick="sendExample('I\'m installing a dishwasher 30 feet from the panel. What do I need?')">
+                    Dishwasher Installation
+                </button>
+            </div>
+            
+            <form class="input-form" id="chatForm" onsubmit="sendMessage(event)">
+                <input 
+                    type="text" 
+                    class="input-field" 
+                    id="messageInput" 
+                    placeholder="Ask about building codes, materials, or project help..."
+                    autocomplete="off"
+                >
+                <button type="submit" class="send-button" id="sendButton">Send</button>
+            </form>
+        </div>
+    </div>
+    
+    <script>
+        let conversationHistory = [];
+        
+        function sendExample(message) {
+            document.getElementById('messageInput').value = message;
+            sendMessage(new Event('submit'));
+        }
+        
+        async function sendMessage(event) {
+            event.preventDefault();
+            
+            const input = document.getElementById('messageInput');
+            const sendButton = document.getElementById('sendButton');
+            const messagesContainer = document.getElementById('messages');
+            const message = input.value.trim();
+            
+            if (!message) return;
+            
+            // Add user message to UI
+            addMessage('user', message);
+            
+            // Clear input and disable send
+            input.value = '';
+            sendButton.disabled = true;
+            
+            // Show loading
+            const loadingId = showLoading();
+            
+            try {
+                const response = await fetch('/chat', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        message: message,
+                        history: conversationHistory
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.error) {
+                    addMessage('assistant', `❌ Error: ${data.error}`);
+                } else {
+                    conversationHistory = data.history;
+                    addMessage('assistant', data.response);
+                }
+            } catch (error) {
+                addMessage('assistant', `❌ Error: ${error.message}`);
+            } finally {
+                removeLoading(loadingId);
+                sendButton.disabled = false;
+                input.focus();
+            }
+        }
+        
+        function addMessage(role, content) {
+            const messagesContainer = document.getElementById('messages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${role}`;
+            
+            const avatar = role === 'user' ? '👤' : '🤖';
+            
+            messageDiv.innerHTML = `
+                <div class="message-avatar">${avatar}</div>
+                <div class="message-content">${formatMessage(content)}</div>
+            `;
+            
+            messagesContainer.appendChild(messageDiv);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+        
+        function formatMessage(content) {
+            // Simple markdown-like formatting
+            return content
+                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                .replace(/\n/g, '<br>')
+                .replace(/💡/g, '<span style="color: #f59e0b;">💡</span>');
+        }
+        
+        function showLoading() {
+            const messagesContainer = document.getElementById('messages');
+            const loadingDiv = document.createElement('div');
+            const loadingId = 'loading-' + Date.now();
+            loadingDiv.id = loadingId;
+            loadingDiv.className = 'loading';
+            loadingDiv.innerHTML = `
+                <span>Claude is thinking</span>
+                <div class="loading-dots">
+                    <div class="loading-dot"></div>
+                    <div class="loading-dot"></div>
+                    <div class="loading-dot"></div>
+                </div>
+            `;
+            messagesContainer.appendChild(loadingDiv);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            return loadingId;
+        }
+        
+        function removeLoading(loadingId) {
+            const loadingDiv = document.getElementById(loadingId);
+            if (loadingDiv) {
+                loadingDiv.remove();
+            }
+        }
+    </script>
+</body>
+</html>

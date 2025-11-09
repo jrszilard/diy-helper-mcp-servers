@@ -5,4 +5,4 @@ python-dotenv>=1.0.0
 anthropic>=0.18.0
 
 httpx>=0.25.0
-aiohttp>=3.9.0
+aiohttp>=3.9.0flask>=3.0.0
