@@ -16,6 +16,27 @@ Provides access to residential building codes including:
 - `check_code_compliance` - Verify scenario compliance
 - `list_code_categories` - Browse available codes
 
+### Material Specs Server
+Provides real-time material search, pricing, and quantity calculations.
+
+**Tools:**
+- `search_materials` - Search for products across suppliers
+- `get_product_details` - Get detailed product specifications
+- `find_alternatives` - Find similar products at different price points
+- `check_compatibility` - Verify product compatibility
+- `calculate_wire_needed` - Calculate electrical wire quantities
+- `calculate_outlets_needed` - Calculate outlet requirements per NEC
+- `calculate_tile_needed` - Calculate tile quantities
+- `calculate_paint_needed` - Calculate paint requirements
+- `calculate_deck_lumber` - Calculate deck framing materials
+- `calculate_pex_pipe` - Calculate plumbing pipe needs
+- `create_shopping_list` - Generate complete shopping lists
+
+**Running:**
+```bash
+python src/material_specs_server/server.py
+```
+
 ## Installation
 
 ### Prerequisites
@@ -118,8 +139,43 @@ Edit `src/building_codes_server/codes.json`:
 ```
 
 ### Running Tests
+## Testing
+
+### Run All Tests
 ```bash
-pytest tests/
+# Run all tests
+./run_all_tests.sh
+
+# Or run individually:
+python tests/test_building_codes.py
+python tests/test_material_server.py
+```
+
+### Test Coverage
+
+**Building Codes Server:**
+- ✓ Code search functionality
+- ✓ Specific section retrieval
+- ✓ Category listing
+- ✓ Common DIY questions
+- ✓ Jurisdiction filtering
+- ✓ Edge case handling
+
+**Material Specs Server:**
+- ✓ Product search
+- ✓ Product details
+- ✓ Material calculators (7 types)
+- ✓ Alternative products
+- ✓ Compatibility checks
+- ✓ Shopping list generation
+
+### Quick Tests
+```bash
+# Test building codes server directly
+python src/building_codes_server/server.py
+
+# Test material specs server directly
+python src/material_specs_server/server.py
 ```
 
 ## Roadmap
